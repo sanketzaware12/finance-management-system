@@ -1,0 +1,24 @@
+# Java / Maven
+backend/target/
+*.class
+*.jar
+
+# Eclipse / STS
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# VS Code
+frontend/.vscode/
+backend/.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment / secrets
+.env
+application-local.properties

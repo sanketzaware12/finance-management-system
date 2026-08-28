@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Finora | Finance Management System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          brand: { 50:'#eef7f5',100:'#d8eee9',200:'#b5ddd4',300:'#8bc8bb',400:'#5db09f',500:'#318f7e',600:'#257566',700:'#1e5f54',800:'#194d45',900:'#153f39' },
+          ink: '#243238',
+          paper: '#f6f8fb'
+        },
+        boxShadow: { soft:'0 10px 30px rgba(31, 52, 58, .07)', card:'0 4px 18px rgba(31, 52, 58, .06)' }
+      }}
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-paper text-ink antialiased">
+  <div id="toast-root" class="fixed right-4 top-4 z-[100] space-y-3"></div>
+
+  <section id="auth-screen" class="min-h-screen grid lg:grid-cols-2">
+    <div class="hidden lg:flex relative overflow-hidden bg-gradient-to-br from-brand-800 via-brand-700 to-brand-500 p-12 text-white">
+      <div class="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10"></div>
+      <div class="absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/10"></div>
+      <div class="relative z-10 max-w-xl self-center">
+        <div class="flex items-center gap-3 mb-10"><div class="logo-mark"><i data-lucide="landmark"></i></div><span class="text-2xl font-bold tracking-tight">Finora</span></div>
+        <p class="mb-5 text-sm font-semibold uppercase tracking-[.22em] text-white/70">Finance Management System</p>
+        <h2 class="text-5xl font-bold leading-tight">Simple money management, designed for clarity.</h2>
+        <p class="mt-6 max-w-lg text-lg leading-8 text-white/75">Manage savings, transactions, fixed deposits, recurring deposits, loans and EMI schedules from one calm, responsive workspace.</p>
+        <div class="mt-10 grid grid-cols-2 gap-4 max-w-md">
+          <div class="glass-stat"><i data-lucide="shield-check"></i><span>JWT secured</span></div>
+          <div class="glass-stat"><i data-lucide="smartphone"></i><span>Responsive UI</span></div>
+          <div class="glass-stat"><i data-lucide="layout-dashboard"></i><span>Unified dashboard</span></div>
+          <div class="glass-stat"><i data-lucide="bell"></i><span>Smart notifications</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-center p-6 sm:p-10">
+      <div class="w-full max-w-md">
+        <div class="lg:hidden flex items-center gap-3 mb-10"><div class="logo-mark logo-mark-light"><i data-lucide="landmark"></i></div><span class="text-2xl font-bold">Finora</span></div>
+        <div class="mb-8">
+        </div>
+        <div id="login-panel">
+          <form id="login-form" class="space-y-5">
+             <p class="eyebrow">Welcome back</p>
+          <h2 class="mt-2 text-3xl font-bold tracking-tight">Sign in to your account</h2>
+            <div><label class="field-label">Email</label><div class="input-wrap"><i data-lucide="mail"></i><input id="login-email" type="email" required placeholder="Enter your email"></div></div>
+            <div><label class="field-label">Password</label><div class="input-wrap"><i data-lucide="lock-keyhole"></i><input id="login-password" type="password" required placeholder="Enter your password"><button type="button" class="icon-btn" onclick="togglePassword('login-password',this)"><i data-lucide="eye"></i></button></div></div>
+            <button class="primary-btn w-full" type="submit"><i data-lucide="log-in"></i> Sign in</button>
+          </form>
+          <p class="mt-5 text-center text-sm text-slate-500">Don't have an account? <button type="button" class="font-semibold text-brand-600 hover:text-brand-700" onclick="showRegister()">Create an account</button></p>
+        </div>
+
+        <div id="register-panel" class="hidden">
+          <div class="mb-6">
+            <p class="eyebrow">New customer</p>
+            <h2 class="mt-2 text-3xl font-bold tracking-tight">Create your account</h2>
+          </div>
+          <form id="register-form" class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div><label class="field-label">Full name</label><div class="input-wrap"><i data-lucide="user-round"></i><input id="register-name" type="text" required placeholder="Enter your full name"></div></div>
+              <div><label class="field-label">Mobile number</label><div class="input-wrap"><i data-lucide="smartphone"></i><input id="register-mobile" type="tel" inputmode="numeric" pattern="[0-9]{10}" maxlength="10" required placeholder="10-digit mobile number"></div></div>
+              <div class="sm:col-span-2"><label class="field-label">Email</label><div class="input-wrap"><i data-lucide="mail"></i><input id="register-email" type="email" required placeholder="Enter your email"></div></div>
+              <div><label class="field-label">Password</label><div class="input-wrap"><i data-lucide="lock-keyhole"></i><input id="register-password" type="password" minlength="4" required placeholder="Create a password"><button type="button" class="icon-btn" onclick="togglePassword('register-password',this)"><i data-lucide="eye"></i></button></div></div>
+              <div><label class="field-label">Confirm password</label><div class="input-wrap"><i data-lucide="shield-check"></i><input id="register-confirm-password" type="password" minlength="4" required placeholder="Confirm your password"></div></div>
+              <div><label class="field-label">Gender</label><div class="input-wrap"><i data-lucide="users"></i><select id="register-gender" required><option value="">Select gender</option><option>Male</option><option>Female</option><option>Other</option></select></div></div>
+              <div><label class="field-label">Address</label><div class="input-wrap"><i data-lucide="map-pin"></i><input id="register-address" type="text" required placeholder="Enter your address"></div></div>
+            </div>
+            <button id="register-submit" class="primary-btn w-full" type="submit"><i data-lucide="user-plus"></i> Create account</button>
+            <p class="text-center text-sm text-slate-500">Already have an account? <button type="button" class="font-semibold text-brand-600 hover:text-brand-700" onclick="showLogin()">Sign in</button></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="app-screen" class="hidden min-h-screen">
+    <div id="mobile-overlay" class="fixed inset-0 z-40 hidden bg-slate-900/30 lg:hidden" onclick="closeSidebar()"></div>
+    <aside id="sidebar" class="sidebar">
+      <div class="flex items-center gap-3 px-5 py-5"><div class="logo-mark logo-mark-light"><i data-lucide="landmark"></i></div><div><div class="font-bold text-lg">Finora</div><div class="text-[11px] text-slate-400">Finance workspace</div></div></div>
+      <nav id="nav" class="mt-4 space-y-1 px-3"></nav>
+    </aside>
+
+    <main class="lg:ml-[260px] min-h-screen">
+      <header class="sticky top-0 z-30 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
+        <div class="flex h-[72px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-3"><button class="mobile-menu" onclick="openSidebar()"><i data-lucide="menu"></i></button><div><div id="page-eyebrow" class="text-xs font-semibold uppercase tracking-widest text-brand-600">Overview</div><h1 id="page-title" class="text-xl font-bold sm:text-2xl">Dashboard</h1></div></div>
+          <div class="flex items-center gap-2 sm:gap-3"><button class="top-icon" onclick="refreshCurrent()" title="Refresh"><i data-lucide="refresh-cw"></i></button><div class="relative"><button class="profile-chip" onclick="toggleProfile()"><div id="header-avatar" class="avatar small">S</div><div class="hidden sm:block text-left"><div id="header-email" class="max-w-[180px] truncate text-sm font-semibold"></div><div id="header-role" class="text-[11px] text-slate-500"></div></div><i data-lucide="chevron-down" class="hidden sm:block"></i></button><div id="profile-menu" class="absolute right-0 top-14 hidden w-52 rounded-2xl border border-slate-200 bg-white p-2 shadow-soft"><button class="profile-item" onclick="navigate('profile');toggleProfile()"><i data-lucide="user-round"></i> My profile</button><button class="profile-item text-rose-600" onclick="logout()"><i data-lucide="log-out"></i> Sign out</button></div></div></div>
+        </div>
+      </header>
+      <div id="content" class="p-4 sm:p-6 lg:p-8"></div>
+    </main>
+  </section>
+
+  <div id="modal-root"></div>
+
+  <!-- config.js MUST load before app.js: it sets window.APP_CONFIG.API_BASE_URL -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
