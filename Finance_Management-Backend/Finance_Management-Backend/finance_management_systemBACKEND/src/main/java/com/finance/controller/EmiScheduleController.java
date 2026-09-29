@@ -50,6 +50,18 @@ public class EmiScheduleController {
     }
  
     // =========================
+    // SYNC EXISTING LOAN PAYMENTS
+    // =========================
+    @PostMapping("/sync/{loanId}")
+    public ResponseEntity<List<EmiScheduleDTO>> syncSchedule(
+            @PathVariable Long loanId) {
+
+        return ResponseEntity.ok(
+                emiScheduleService.syncScheduleWithLoan(loanId)
+        );
+    }
+
+    // =========================
     // GET ALL EMI OF LOAN
     // =========================
     @GetMapping("/loan/{loanId}")

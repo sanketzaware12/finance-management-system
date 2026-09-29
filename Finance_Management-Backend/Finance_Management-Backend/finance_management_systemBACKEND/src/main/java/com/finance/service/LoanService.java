@@ -15,6 +15,8 @@ import com.finance.dto.LoanDTO;
 import com.finance.entity.Loan;
 import com.finance.exception.ResourceNotFoundException;
 import com.finance.repository.LoanRepository;
+import com.finance.repository.EmiScheduleRepository;
+import com.finance.entity.EmiSchedule;
 
 @Service
 public class LoanService {
@@ -23,9 +25,12 @@ public class LoanService {
             LoggerFactory.getLogger(LoanService.class);
 
     private final LoanRepository loanRepository;
+    private final EmiScheduleRepository emiScheduleRepository;
 
-    public LoanService(LoanRepository loanRepository) {
+    public LoanService(LoanRepository loanRepository,
+                       EmiScheduleRepository emiScheduleRepository) {
         this.loanRepository = loanRepository;
+        this.emiScheduleRepository = emiScheduleRepository;
     }
 
     // =========================
@@ -284,6 +289,26 @@ public class LoanService {
 
         Loan savedLoan =
                 loanRepository.save(loan);
+
+        // Keep the EMI schedule in sync when the existing Loan payment API
+        // receives a complete EMI amount. This does not change the loan
+        // payment calculation; it only records the matching EMI as PAID.
+        emiScheduleRepository
+                .findByLoanIdOrderByEmiNumberAsc(id)
+                .stream()
+                .filter(e -> !"PAID".equalsIgnoreCase(e.getStatus()))
+                .findFirst()
+                .ifPresent(nextEmi -> {
+                    if (amount.compareTo(nextEmi.getEmiAmount()) == 0) {
+                        nextEmi.setPaidAmount(amount);
+                        nextEmi.setPaymentDate(LocalDate.now());
+                        nextEmi.setStatus("PAID");
+                        emiScheduleRepository.save(nextEmi);
+                        logger.info(
+                                "EMI schedule synchronized. EMI ID: {}, Loan ID: {}",
+                                nextEmi.getId(), id);
+                    }
+                });
 
         logger.info(
                 "Loan payment successful. Loan ID: {}, Remaining Outstanding: {}",

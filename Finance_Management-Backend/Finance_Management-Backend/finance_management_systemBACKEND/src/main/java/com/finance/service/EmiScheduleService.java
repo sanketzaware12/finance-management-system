@@ -303,6 +303,73 @@ public class EmiScheduleService {
         return convertToDTO(savedSchedule);
     }
 
+
+    // =========================
+    // SYNC EXISTING LOAN PAYMENTS
+    // =========================
+    @Transactional
+    public List<EmiScheduleDTO> syncScheduleWithLoan(Long loanId) {
+
+        Loan loan = loanRepository.findById(loanId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Loan not found with ID: " + loanId));
+
+        List<EmiSchedule> schedules = emiScheduleRepository
+                .findByLoanIdOrderByEmiNumberAsc(loanId);
+
+        if (schedules.isEmpty()) {
+            return List.of();
+        }
+
+        BigDecimal outstanding = loan.getOutstandingAmount() == null
+                ? BigDecimal.ZERO
+                : loan.getOutstandingAmount();
+        BigDecimal totalPayable = loan.getTotalPayable() == null
+                ? schedules.stream()
+                    .map(EmiSchedule::getEmiAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                : loan.getTotalPayable();
+        BigDecimal targetPaid = totalPayable.subtract(outstanding)
+                .max(BigDecimal.ZERO);
+
+        BigDecimal paidSoFar = BigDecimal.ZERO;
+        boolean changed = false;
+
+        for (EmiSchedule schedule : schedules) {
+            if ("PAID".equalsIgnoreCase(schedule.getStatus())) {
+                paidSoFar = paidSoFar.add(schedule.getPaidAmount() == null
+                        ? schedule.getEmiAmount()
+                        : schedule.getPaidAmount());
+                continue;
+            }
+
+            BigDecimal emiAmount = schedule.getEmiAmount() == null
+                    ? BigDecimal.ZERO
+                    : schedule.getEmiAmount();
+            boolean loanFullyPaid = outstanding.compareTo(BigDecimal.ZERO) == 0;
+            boolean enoughRecordedPayment = targetPaid.subtract(paidSoFar)
+                    .compareTo(emiAmount) >= 0;
+            if (loanFullyPaid || enoughRecordedPayment) {
+                schedule.setPaidAmount(emiAmount);
+                schedule.setPaymentDate(LocalDate.now());
+                schedule.setStatus("PAID");
+                emiScheduleRepository.save(schedule);
+                paidSoFar = paidSoFar.add(emiAmount);
+                changed = true;
+            } else {
+                break;
+            }
+        }
+
+        if (changed) {
+            logger.info(
+                    "Existing loan payments synchronized with EMI schedule. Loan ID: {}",
+                    loanId);
+        }
+
+        return getScheduleByLoanId(loanId);
+    }
+
     // =========================
     // GET SCHEDULE BY LOAN
     // =========================
